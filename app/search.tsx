@@ -1,7 +1,6 @@
 import React from 'react'
 import { Searchbar, Surface } from 'react-native-paper'
 
-import Locales from '@/lib/locales'
 import { ScreenInfo, styles } from '@/lib/ui'
 
 const Search = () => {
@@ -30,7 +29,7 @@ const Search = () => {
       />
 
       <Surface style={styles.screen}>
-        <ScreenInfo title={Locales.t('search')} path="app/search.tsx" />
+        <ScreenInfo title="Search" path="app/search.tsx" />
       </Surface>
     </Surface>
   )

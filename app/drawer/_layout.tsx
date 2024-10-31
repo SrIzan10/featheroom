@@ -4,7 +4,6 @@ import React from 'react'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { Appbar, Menu, Tooltip, useTheme } from 'react-native-paper'
 
-import Locales from '@/lib/locales'
 import { DrawerContent, DrawerHeader } from '@/lib/ui'
 
 const DrawerLayout = () => {
@@ -35,11 +34,11 @@ const DrawerLayout = () => {
         <Drawer.Screen
           name="index"
           options={{
-            drawerLabel: Locales.t('titleHome'),
-            title: Locales.t('titleHome'),
+            drawerLabel: 'Home',
+            title: 'Home',
             headerRight: () => (
               <>
-                <Tooltip title={Locales.t('search')}>
+                <Tooltip title="Search">
                   <Appbar.Action
                     icon="magnify"
                     onPress={() => router.push('/search')}
@@ -50,7 +49,7 @@ const DrawerLayout = () => {
                   visible={visible}
                   onDismiss={() => setVisible(false)}
                   anchor={
-                    <Tooltip title={Locales.t('options')}>
+                    <Tooltip title="Options">
                       <Appbar.Action
                         icon="dots-vertical"
                         onPress={() => setVisible(true)}
@@ -59,17 +58,17 @@ const DrawerLayout = () => {
                   }
                 >
                   <Menu.Item
-                    title={Locales.t('titleSettings')}
+                    title="Settings"
                     leadingIcon="cog"
                     onPress={() => router.push('/drawer/settings')}
                   />
                   <Menu.Item
-                    title={Locales.t('stackNav')}
+                    title="Stack Navigation"
                     leadingIcon="card-multiple-outline"
                     onPress={() => router.push('/modal')}
                   />
                   <Menu.Item
-                    title={Locales.t('drawerNav')}
+                    title="Drawer Navigation"
                     leadingIcon="gesture-swipe"
                     onPress={() => router.push('/drawer')}
                   />
@@ -81,17 +80,17 @@ const DrawerLayout = () => {
         <Drawer.Screen
           name="profile"
           options={{
-            drawerLabel: Locales.t('profile'),
-            title: Locales.t('profile'),
+            drawerLabel: 'Profile',
+            title: 'Profile',
             headerRight: () => (
               <>
-                <Tooltip title={Locales.t('search')}>
+                <Tooltip title="Search">
                   <Appbar.Action
                     icon="magnify"
                     onPress={() => router.push('/search')}
                   />
                 </Tooltip>
-                <Tooltip title={Locales.t('titleSettings')}>
+                <Tooltip title="Settings">
                   <Appbar.Action
                     icon="cog"
                     onPress={() => router.push('/(tabs)/settings')}
@@ -104,10 +103,10 @@ const DrawerLayout = () => {
         <Drawer.Screen
           name="settings"
           options={{
-            drawerLabel: Locales.t('titleSettings'),
-            title: Locales.t('titleSettings'),
+            drawerLabel: 'Settings',
+            title: 'Settings',
             headerRight: () => (
-              <Tooltip title={Locales.t('stackNav')}>
+              <Tooltip title="Stack Navigation">
                 <Appbar.Action
                   icon="card-multiple-outline"
                   onPress={() => router.push('/modal')}

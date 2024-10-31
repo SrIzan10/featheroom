@@ -11,10 +11,8 @@ import {
   Icon,
 } from 'react-native-paper'
 
-import Locales from '@/lib/locales'
-import { Color, Language, Setting } from '@/lib/types'
+import { Color, Setting } from '@/lib/types'
 import { Colors, LoadingIndicator, ScreenInfo, styles } from '@/lib/ui'
-import { Languages } from '@/lib/utils'
 
 const Settings = () => {
   const colorScheme = useColorScheme()
@@ -22,12 +20,10 @@ const Settings = () => {
   const [message, setMessage] = React.useState({ visible: false, content: '' })
   const [settings, setSettings] = React.useState<Setting>({
     color: 'default',
-    language: 'auto',
     theme: 'auto',
   })
   const [display, setDisplay] = React.useState({
     color: false,
-    language: false,
     theme: false,
   })
 
@@ -65,61 +61,12 @@ const Settings = () => {
           <List.AccordionGroup>
             <List.Accordion
               id="1"
-              title={Locales.t('appearance')}
+              title="Appearance"
               left={(props) => <List.Icon {...props} icon="palette" />}
             >
               <List.Item
-                title={Locales.t('language')}
-                description={Locales.t('changeLanguage')}
-                left={(props) => <List.Icon {...props} icon="translate" />}
-                right={(props) => (
-                  <Menu
-                    visible={display.language}
-                    onDismiss={() =>
-                      setDisplay({ ...display, language: false })
-                    }
-                    anchor={
-                      <IconButton
-                        {...props}
-                        icon="pencil"
-                        onPress={() =>
-                          setDisplay({ ...display, language: true })
-                        }
-                      />
-                    }
-                  >
-                    <Menu.Item
-                      title="System"
-                      trailingIcon={
-                        settings.language === 'auto' ? 'check' : undefined
-                      }
-                      onPress={() => {
-                        setSettings({ ...settings, language: 'auto' })
-                        setDisplay({ ...display, language: false })
-                      }}
-                    />
-                    {Object.entries(Languages).map((lang) => (
-                      <Menu.Item
-                        key={lang[0]}
-                        title={`${lang[1].name} / ${lang[1].nativeName}`}
-                        trailingIcon={
-                          settings.language === lang[0] ? 'check' : undefined
-                        }
-                        onPress={() => {
-                          setSettings({
-                            ...settings,
-                            language: lang[0] as Language,
-                          })
-                          setDisplay({ ...display, language: false })
-                        }}
-                      />
-                    ))}
-                  </Menu>
-                )}
-              />
-              <List.Item
-                title={Locales.t('mode')}
-                description={Locales.t('changeMode')}
+                title="Mode"
+                description="Change Mode"
                 left={(props) => (
                   <List.Icon
                     {...props}
@@ -145,7 +92,7 @@ const Settings = () => {
                     }
                   >
                     <Menu.Item
-                      title={Locales.t('system')}
+                      title="System"
                       leadingIcon="theme-light-dark"
                       trailingIcon={
                         settings.theme === 'auto' ? 'check' : undefined
@@ -156,7 +103,7 @@ const Settings = () => {
                       }}
                     />
                     <Menu.Item
-                      title={Locales.t('lightMode')}
+                      title="Light Mode"
                       leadingIcon="weather-sunny"
                       trailingIcon={
                         settings.theme === 'light' ? 'check' : undefined
@@ -167,7 +114,7 @@ const Settings = () => {
                       }}
                     />
                     <Menu.Item
-                      title={Locales.t('darkMode')}
+                      title="Dark Mode"
                       leadingIcon="weather-night"
                       trailingIcon={
                         settings.theme === 'dark' ? 'check' : undefined
@@ -181,8 +128,8 @@ const Settings = () => {
                 )}
               />
               <List.Item
-                title={Locales.t('color')}
-                description={Locales.t('changeColor')}
+                title="Color"
+                description="Change Color"
                 left={(props) => (
                   <List.Icon
                     {...props}
@@ -243,7 +190,7 @@ const Settings = () => {
 
                         <Menu.Item
                           key={color}
-                          title={Locales.t(color)}
+                          title={color}
                           onPress={() => {
                             setSettings({
                               ...settings,
@@ -263,10 +210,7 @@ const Settings = () => {
       )}
 
       <Surface elevation={0} style={styles.screen}>
-        <ScreenInfo
-          title={Locales.t('titleSettings')}
-          path="app/(tabs)/settings.tsx"
-        />
+        <ScreenInfo title="Settings" path="app/(tabs)/settings.tsx" />
       </Surface>
 
       <Button
@@ -278,7 +222,7 @@ const Settings = () => {
                 .then(() =>
                   setMessage({
                     visible: true,
-                    content: Locales.t('restartApp'),
+                    content: 'Please restart the app to apply changes.',
                   }),
                 )
                 .catch((res) =>
@@ -289,11 +233,11 @@ const Settings = () => {
                 )
             : setMessage({
                 visible: true,
-                content: Locales.t('notAvailable'),
+                content: 'This feature is not available on the web.',
               })
         }
       >
-        {Locales.t('save')}
+        Save
       </Button>
 
       <Snackbar

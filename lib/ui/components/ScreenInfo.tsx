@@ -1,6 +1,5 @@
 import { Chip, Text } from 'react-native-paper'
 
-import Locales from '@/lib/locales'
 import GradientBackground from '@/lib/ui/components/GradientBackground'
 
 const ScreenInfo = (props: { title: string; path: string }) => (
@@ -9,14 +8,14 @@ const ScreenInfo = (props: { title: string; path: string }) => (
 
     <Text variant="displaySmall">{props.title}</Text>
 
-    <Text variant="bodyLarge">{Locales.t('openScreenCode')}</Text>
+    <Text variant="bodyLarge">Open the screen code to edit it.</Text>
 
     <Chip textStyle={{ fontFamily: 'JetBrainsMono_400Regular' }}>
       {props.path}
     </Chip>
 
     <Text variant="bodyLarge" style={{ textAlign: 'center' }}>
-      {Locales.t('changeScreenCode')}
+      Change the screen code to see updates.
     </Text>
   </>
 )

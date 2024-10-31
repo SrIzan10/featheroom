@@ -3,7 +3,6 @@ import { Tabs, router } from 'expo-router'
 import React from 'react'
 import { Appbar, Menu, Tooltip } from 'react-native-paper'
 
-import Locales from '@/lib/locales'
 import { TabBar, TabsHeader } from '@/lib/ui'
 
 const TabLayout = () => {
@@ -20,10 +19,10 @@ const TabLayout = () => {
       <Tabs.Screen
         name="index"
         options={{
-          title: Locales.t('titleHome'),
+          title: 'Home',
           headerRight: () => (
             <>
-              <Tooltip title={Locales.t('search')}>
+              <Tooltip title="Search">
                 <Appbar.Action
                   icon="magnify"
                   onPress={() => router.push('/search')}
@@ -34,7 +33,7 @@ const TabLayout = () => {
                 visible={visible}
                 onDismiss={() => setVisible(false)}
                 anchor={
-                  <Tooltip title={Locales.t('options')}>
+                  <Tooltip title="Options">
                     <Appbar.Action
                       icon="dots-vertical"
                       onPress={() => setVisible(true)}
@@ -43,17 +42,17 @@ const TabLayout = () => {
                 }
               >
                 <Menu.Item
-                  title={Locales.t('titleSettings')}
+                  title="Settings"
                   leadingIcon="cog"
                   onPress={() => router.push('/(tabs)/settings')}
                 />
                 <Menu.Item
-                  title={Locales.t('stackNav')}
+                  title="Stack Navigation"
                   leadingIcon="card-multiple-outline"
                   onPress={() => router.push('/modal')}
                 />
                 <Menu.Item
-                  title={Locales.t('drawerNav')}
+                  title="Drawer Navigation"
                   leadingIcon="gesture-swipe"
                   onPress={() => router.push('/drawer')}
                 />
@@ -72,16 +71,16 @@ const TabLayout = () => {
       <Tabs.Screen
         name="profile"
         options={{
-          title: Locales.t('profile'),
+          title: 'Profile',
           headerRight: () => (
             <>
-              <Tooltip title={Locales.t('search')}>
+              <Tooltip title="Search">
                 <Appbar.Action
                   icon="magnify"
                   onPress={() => router.push('/search')}
                 />
               </Tooltip>
-              <Tooltip title={Locales.t('titleSettings')}>
+              <Tooltip title="Settings">
                 <Appbar.Action
                   icon="cog"
                   onPress={() => router.push('/(tabs)/settings')}
@@ -101,9 +100,9 @@ const TabLayout = () => {
       <Tabs.Screen
         name="settings"
         options={{
-          title: Locales.t('titleSettings'),
+          title: 'Settings',
           headerRight: () => (
-            <Tooltip title={Locales.t('drawerNav')}>
+            <Tooltip title="Drawer Navigation">
               <Appbar.Action
                 icon="gesture-swipe"
                 onPress={() => router.push('/drawer')}
@@ -122,5 +121,4 @@ const TabLayout = () => {
     </Tabs>
   )
 }
-
 export default TabLayout
