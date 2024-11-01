@@ -6,7 +6,8 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "jsxImportSource": "nativewind"
   },
   "include": [
     "**/*.ts",
@@ -15,5 +16,5 @@
     "expo-env.d.ts",
     "app/(app)/plushtml.old",
     "nativewind-env.d.ts"
-  ]
+, "babel.config.js"  ]
 }

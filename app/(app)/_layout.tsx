@@ -16,8 +16,7 @@ import { useColorScheme } from 'react-native'
 import { PaperProvider } from 'react-native-paper'
 
 import { useAuth } from '@/lib/providers/auth'
-import { Setting } from '@/lib/types'
-import { StackHeader, Themes } from '@/lib/ui'
+import { StackHeader } from '@/lib/ui'
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -26,7 +25,7 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(root)/login',
+  initialRouteName: '(root)',
 }
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.

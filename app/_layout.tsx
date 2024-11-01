@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react'
 import { Setting } from '@/lib/types'
 import { Themes } from '@/lib/ui'
 
+import '../global.css'
+
 export default function Root() {
   const colorScheme = useColorScheme()
   const [settings, setSettings] = useState<Setting>({
