@@ -78,3 +78,4 @@ expo-env.d.ts
 # erm
 *google-services.json
 keys.txt
+android/

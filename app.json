@@ -27,7 +27,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "dev.srizan.featheroom"
+      "package": "dev.srizan.featheroom",
+      "googleServicesFile": "./lib/google-services.json"
     },
     "web": {
       "bundler": "metro",
