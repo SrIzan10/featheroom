@@ -69,35 +69,6 @@ const TabLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          headerRight: () => (
-            <>
-              <Tooltip title="Search">
-                <Appbar.Action
-                  icon="magnify"
-                  onPress={() => router.push('/search')}
-                />
-              </Tooltip>
-              <Tooltip title="Settings">
-                <Appbar.Action
-                  icon="cog"
-                  onPress={() => router.push('/(tabs)/settings')}
-                />
-              </Tooltip>
-            </>
-          ),
-          tabBarIcon: (props) => (
-            <MaterialCommunityIcons
-              {...props}
-              size={24}
-              name={props.focused ? 'account' : 'account-outline'}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="settings"
         options={{
           title: 'Settings',

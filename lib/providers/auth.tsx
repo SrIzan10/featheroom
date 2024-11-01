@@ -2,7 +2,13 @@ import {
   GoogleSignin,
   type User,
 } from '@react-native-google-signin/google-signin'
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react'
 
 interface AuthProviderProps {
   children: ReactNode

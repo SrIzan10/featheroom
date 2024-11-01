@@ -13,11 +13,15 @@ import {
 
 import { Color, Setting } from '@/lib/types'
 import { Colors, LoadingIndicator, ScreenInfo, styles } from '@/lib/ui'
+import { reloadAppAsync } from 'expo'
+import { useAuth } from '@/lib/providers/auth'
+import { Image } from 'expo-image'
 
 const Settings = () => {
   const colorScheme = useColorScheme()
   const [loading, setLoading] = React.useState<boolean>(false)
   const [message, setMessage] = React.useState({ visible: false, content: '' })
+  const { user, signIn, signOut } = useAuth()
   const [settings, setSettings] = React.useState<Setting>({
     color: 'default',
     theme: 'auto',
@@ -204,41 +208,71 @@ const Settings = () => {
                   </Menu>
                 )}
               />
+              <Button
+                mode="contained"
+                style={{ margin: 16 }}
+                icon="content-save"
+                onPress={() =>
+                  SecureStore.setItemAsync('settings', JSON.stringify(settings))
+                    .then(async () => {
+                      setMessage({
+                        visible: true,
+                        content: 'Restarting app...',
+                      })
+                      await reloadAppAsync()
+                    })
+                    .catch((res) =>
+                      setMessage({
+                        visible: true,
+                        content: res.message,
+                      }),
+                    )
+                }
+              >
+                Save
+              </Button>
             </List.Accordion>
           </List.AccordionGroup>
         </Surface>
       )}
 
-      <Surface elevation={0} style={styles.screen}>
-        <ScreenInfo title="Settings" path="app/(tabs)/settings.tsx" />
+      {/* make a surface for the authentication */}
+      <Surface elevation={0}>
+        <List.Accordion
+          id="2"
+          title="Authentication"
+          left={(props) => <List.Icon {...props} icon={'account'} />}
+        >
+          {user ? (
+            <>
+              <List.Item
+                title={`Hey ${user.user.givenName}!`}
+                description="Click here to check more info"
+                left={(props) => <List.Icon {...props} icon="fingerprint" />}
+              />
+              <List.Item
+                title="Sign Out"
+                description="Sign out of your account"
+                left={(props) => <List.Icon {...props} icon="logout" />}
+                onPress={async () => {
+                  await signOut()
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <List.Item
+                title="Login"
+                description="Log in to your account"
+                left={(props) => <List.Icon {...props} icon="login" />}
+                onPress={async () => {
+                  await signIn()
+                }}
+              />
+            </>
+          )}
+        </List.Accordion>
       </Surface>
-
-      <Button
-        mode="contained"
-        style={{ margin: 16 }}
-        onPress={() =>
-          Platform.OS !== 'web'
-            ? SecureStore.setItemAsync('settings', JSON.stringify(settings))
-                .then(() =>
-                  setMessage({
-                    visible: true,
-                    content: 'Please restart the app to apply changes.',
-                  }),
-                )
-                .catch((res) =>
-                  setMessage({
-                    visible: true,
-                    content: res.message,
-                  }),
-                )
-            : setMessage({
-                visible: true,
-                content: 'This feature is not available on the web.',
-              })
-        }
-      >
-        Save
-      </Button>
 
       <Snackbar
         visible={message.visible}

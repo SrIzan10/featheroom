@@ -21,12 +21,6 @@ const DrawerContent = (props: DrawerContentProps) => (
       onPress={() => router.push('/drawer')}
     />
     <Drawer.Item
-      label="Profile"
-      icon="account"
-      active={props.navProps.state.index === 1}
-      onPress={() => router.push('/drawer/profile')}
-    />
-    <Drawer.Item
       label="Settings"
       icon="cog"
       active={props.navProps.state.index === 2}

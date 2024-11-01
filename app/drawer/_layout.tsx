@@ -78,29 +78,6 @@ const DrawerLayout = () => {
           }}
         />
         <Drawer.Screen
-          name="profile"
-          options={{
-            drawerLabel: 'Profile',
-            title: 'Profile',
-            headerRight: () => (
-              <>
-                <Tooltip title="Search">
-                  <Appbar.Action
-                    icon="magnify"
-                    onPress={() => router.push('/search')}
-                  />
-                </Tooltip>
-                <Tooltip title="Settings">
-                  <Appbar.Action
-                    icon="cog"
-                    onPress={() => router.push('/(tabs)/settings')}
-                  />
-                </Tooltip>
-              </>
-            ),
-          }}
-        />
-        <Drawer.Screen
           name="settings"
           options={{
             drawerLabel: 'Settings',

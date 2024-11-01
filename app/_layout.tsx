@@ -4,15 +4,15 @@ import {
   JetBrainsMono_400Regular,
 } from '@expo-google-fonts/jetbrains-mono'
 import { NotoSans_400Regular } from '@expo-google-fonts/noto-sans'
-import { SplashScreen, Stack } from 'expo-router'
+import { Redirect, SplashScreen, Stack, useRootNavigationState, useRouter } from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
 import React from 'react'
 import { Platform, useColorScheme } from 'react-native'
 import { PaperProvider } from 'react-native-paper'
 
+import { AuthProvider, useAuth } from '@/lib/providers/auth'
 import { Setting } from '@/lib/types'
 import { StackHeader, Themes } from '@/lib/ui'
-import { AuthProvider } from '@/lib/providers/auth'
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -34,6 +34,9 @@ const RootLayout = () => {
     ...MaterialCommunityIcons.font,
   })
 
+  // Get authentication state
+  const rootNavigationState = useRootNavigationState()
+
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   React.useEffect(() => {
     if (error) throw error
@@ -45,7 +48,8 @@ const RootLayout = () => {
     }
   }, [loaded])
 
-  if (!loaded) {
+  // Make sure we have the navigation state before showing content
+  if (!loaded || !rootNavigationState) {
     return null
   }
 
@@ -61,32 +65,28 @@ const RootLayoutNav = () => {
 
   // Load settings from the device
   React.useEffect(() => {
-    if (Platform.OS !== 'web') {
-      SecureStore.getItemAsync('settings').then((result) => {
-        if (result === null) {
-          SecureStore.setItemAsync('settings', JSON.stringify(settings)).then(
-            (res) => console.log(res),
-          )
-        }
+    SecureStore.getItemAsync('settings').then((result) => {
+      if (result === null) {
+        SecureStore.setItemAsync('settings', JSON.stringify(settings)).then(
+          (res) => console.log(res),
+        )
+      }
 
-        setSettings(JSON.parse(result ?? JSON.stringify(settings)))
-      })
-    } else {
-      setSettings({ ...settings, theme: colorScheme ?? 'light' })
-    }
+      setSettings(JSON.parse(result ?? JSON.stringify(settings)))
+    })
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
-    <PaperProvider
-      theme={
-        Themes[
-          settings.theme === 'auto' ? (colorScheme ?? 'dark') : settings.theme
-        ][settings.color]
-      }
-    >
-      <AuthProvider>
+    <AuthProvider>
+      <PaperProvider
+        theme={
+          Themes[
+            settings.theme === 'auto' ? (colorScheme ?? 'dark') : settings.theme
+          ][settings.color]
+        }
+      >
         <Stack
           screenOptions={{
             animation: 'slide_from_bottom',
@@ -95,7 +95,6 @@ const RootLayoutNav = () => {
             ),
           }}
         >
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="drawer" options={{ headerShown: false }} />
           <Stack.Screen name="search" options={{ title: 'Search' }} />
@@ -104,8 +103,8 @@ const RootLayoutNav = () => {
             options={{ title: 'Modal', presentation: 'modal' }}
           />
         </Stack>
-      </AuthProvider>
-    </PaperProvider>
+      </PaperProvider>
+    </AuthProvider>
   )
 }
 
