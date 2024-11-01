@@ -4,7 +4,12 @@ import {
   JetBrainsMono_400Regular,
 } from '@expo-google-fonts/jetbrains-mono'
 import { NotoSans_400Regular } from '@expo-google-fonts/noto-sans'
-import { Redirect, SplashScreen, Stack, useRootNavigationState } from 'expo-router'
+import {
+  Redirect,
+  SplashScreen,
+  Stack,
+  useRootNavigationState,
+} from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
 import React from 'react'
 import { useColorScheme } from 'react-native'
@@ -53,7 +58,6 @@ const RootLayout = () => {
     return null
   }
   if (!user) {
-    console.log('redirecting inside the root')
     return <Redirect href="/login" />
   }
 
@@ -61,52 +65,23 @@ const RootLayout = () => {
 }
 
 const RootLayoutNav = () => {
-  const colorScheme = useColorScheme()
-  const [settings, setSettings] = React.useState<Setting>({
-    theme: 'auto',
-    color: 'default',
-  })
-
-  // Load settings from the device
-  React.useEffect(() => {
-    SecureStore.getItemAsync('settings').then((result) => {
-      if (result === null) {
-        SecureStore.setItemAsync('settings', JSON.stringify(settings)).then(
-          (res) => console.log(res),
-        )
-      }
-
-      setSettings(JSON.parse(result ?? JSON.stringify(settings)))
-    })
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   return (
-    <PaperProvider
-      theme={
-        Themes[
-          settings.theme === 'auto' ? (colorScheme ?? 'dark') : settings.theme
-        ][settings.color]
-      }
+    <Stack
+      screenOptions={{
+        animation: 'slide_from_bottom',
+        header: (props) => (
+          <StackHeader navProps={props} children={undefined} />
+        ),
+      }}
     >
-      <Stack
-        screenOptions={{
-          animation: 'slide_from_bottom',
-          header: (props) => (
-            <StackHeader navProps={props} children={undefined} />
-          ),
-        }}
-      >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="drawer" options={{ headerShown: false }} />
-        <Stack.Screen name="search" options={{ title: 'Search' }} />
-        <Stack.Screen
-          name="modal"
-          options={{ title: 'Modal', presentation: 'modal' }}
-        />
-      </Stack>
-    </PaperProvider>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="drawer" options={{ headerShown: false }} />
+      <Stack.Screen name="search" options={{ title: 'Search' }} />
+      <Stack.Screen
+        name="modal"
+        options={{ title: 'Modal', presentation: 'modal' }}
+      />
+    </Stack>
   )
 }
 
