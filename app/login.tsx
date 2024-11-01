@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router'
 import { useEffect } from 'react'
 import { useColorScheme, View } from 'react-native'
 import { Button, Text } from 'react-native-paper'
+import './global.css'
 
 function Login() {
   const { signIn, user } = useAuth()
