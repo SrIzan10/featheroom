@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router'
 import { useEffect } from 'react'
 import { useColorScheme, View } from 'react-native'
 import { Button, Text } from 'react-native-paper'
+import { verifyInstallation } from 'nativewind'
 
 import { useAuth } from '@/lib/providers/auth'
 
@@ -9,6 +10,7 @@ function Login() {
   const { signIn, user } = useAuth()
   const router = useRouter()
   const colorScheme = useColorScheme()
+  verifyInstallation()
 
   useEffect(() => {
     if (user) {

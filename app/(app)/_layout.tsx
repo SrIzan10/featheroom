@@ -75,7 +75,6 @@ const RootLayoutNav = () => {
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="drawer" options={{ headerShown: false }} />
-      <Stack.Screen name="search" options={{ title: 'Search' }} />
       <Stack.Screen
         name="modal"
         options={{ title: 'Modal', presentation: 'modal' }}

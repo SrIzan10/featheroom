@@ -20,45 +20,6 @@ const TabLayout = () => {
         name="index"
         options={{
           title: 'Home',
-          headerRight: () => (
-            <>
-              <Tooltip title="Search">
-                <Appbar.Action
-                  icon="magnify"
-                  onPress={() => router.push('/search')}
-                />
-              </Tooltip>
-              <Menu
-                statusBarHeight={48}
-                visible={visible}
-                onDismiss={() => setVisible(false)}
-                anchor={
-                  <Tooltip title="Options">
-                    <Appbar.Action
-                      icon="dots-vertical"
-                      onPress={() => setVisible(true)}
-                    />
-                  </Tooltip>
-                }
-              >
-                <Menu.Item
-                  title="Settings"
-                  leadingIcon="cog"
-                  onPress={() => router.push('/(tabs)/settings')}
-                />
-                <Menu.Item
-                  title="Stack Navigation"
-                  leadingIcon="card-multiple-outline"
-                  onPress={() => router.push('/modal')}
-                />
-                <Menu.Item
-                  title="Drawer Navigation"
-                  leadingIcon="gesture-swipe"
-                  onPress={() => router.push('/drawer')}
-                />
-              </Menu>
-            </>
-          ),
           tabBarIcon: (props) => (
             <MaterialCommunityIcons
               {...props}
@@ -72,14 +33,6 @@ const TabLayout = () => {
         name="settings"
         options={{
           title: 'Settings',
-          headerRight: () => (
-            <Tooltip title="Drawer Navigation">
-              <Appbar.Action
-                icon="gesture-swipe"
-                onPress={() => router.push('/drawer')}
-              />
-            </Tooltip>
-          ),
           tabBarIcon: (props) => (
             <MaterialCommunityIcons
               {...props}

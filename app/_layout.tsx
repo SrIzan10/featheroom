@@ -8,6 +8,9 @@ import { Setting } from '@/lib/types'
 import { Themes } from '@/lib/ui'
 
 import '../global.css'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from '@/lib/clients/classroom'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 export default function Root() {
   const colorScheme = useColorScheme()
@@ -39,9 +42,11 @@ export default function Root() {
         ][settings.color]
       }
     >
-      <AuthProvider>
-        <Slot />
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <Slot />
+        </AuthProvider>
+      </QueryClientProvider>
     </PaperProvider>
   )
 }
