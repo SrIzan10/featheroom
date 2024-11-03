@@ -1,4 +1,5 @@
 import { useCourse } from '@/lib/clients/classroom'
+import CourseBoard from '@/lib/ui/components/CourseBoard'
 import Loading from '@/lib/ui/components/Loading'
 import { useLocalSearchParams } from 'expo-router'
 import { Surface, Text } from 'react-native-paper'
@@ -14,7 +15,7 @@ export default function Courses() {
   return (
     <Surface className="flex-1">
       <Text>hi this is class with name {course?.name}</Text>
-      
+      <CourseBoard />
     </Surface>
   )
 }
