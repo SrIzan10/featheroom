@@ -21,13 +21,25 @@ export const queryClient = new QueryClient({
 // API Functions
 const BASE_URL = 'https://classroom.googleapis.com'
 
+// Should fix annoying (in my experience the announcement hook) missing errors.
+let tokenPromise: Promise<string> | null = null
+async function getAuthToken(): Promise<string> {
+  if (!tokenPromise) {
+    tokenPromise = GoogleSignin.getTokens()
+      .then((tokens) => tokens.accessToken)
+      .finally(() => {
+        tokenPromise = null
+      })
+  }
+  return tokenPromise
+}
+
 async function fetchApi<T>(
   endpoint: string,
   insideKey?: string,
   options?: RequestInit,
 ): Promise<T> {
-  const token = (await GoogleSignin.getTokens()).accessToken
-  //console.log(token)
+  const token = await getAuthToken()
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
     headers: {
@@ -42,7 +54,7 @@ async function fetchApi<T>(
   }
 
   const data = await response.json()
-  return insideKey ? data[insideKey] : data
+  return insideKey ? (data[insideKey] ?? []) : data
 }
 
 // Query Keys
@@ -50,7 +62,7 @@ export const keys = {
   courses: {
     all: ['courses'],
     one: (id: string) => ['courses', id],
-    announcement: (courseId: string) => ['courses', courseId, 'announcements'],
+    announcements: (courseId: string) => ['courses', courseId, 'announcements'],
     courseWork: (courseId: string) => ['courses', courseId, 'courseWork'],
     courseWorkMaterials: (courseId: string) => [
       'courses',
@@ -78,7 +90,7 @@ export function useCourse(id: string) {
 
 export function useAnnouncements(courseId: string) {
   return useQuery({
-    queryKey: keys.courses.announcement(courseId),
+    queryKey: keys.courses.announcements(courseId),
     queryFn: () =>
       fetchApi<classroom_v1.Schema$Announcement[]>(
         `/v1/courses/${courseId}/announcements`,

@@ -16,6 +16,7 @@ import { Colors, LoadingIndicator, ScreenInfo, styles } from '@/lib/ui'
 import { reloadAppAsync } from 'expo'
 import { useAuth } from '@/lib/providers/auth'
 import { Image } from 'expo-image'
+import { queryClient } from '@/lib/clients/classroom'
 
 const Settings = () => {
   const colorScheme = useColorScheme()
@@ -273,6 +274,43 @@ const Settings = () => {
           )}
         </List.Accordion>
       </Surface>
+
+      {__DEV__ && (
+        <Surface elevation={0}>
+          <List.Accordion
+            id="3"
+            title="Developer"
+            left={(props) => <List.Icon {...props} icon="code-tags" />}
+          >
+            <List.Item
+              title="Clear settings"
+              description="Clear all setttings"
+              left={(props) => <List.Icon {...props} icon="delete" />}
+              onPress={async () => {
+                await SecureStore.deleteItemAsync('settings')
+                setMessage({
+                  visible: true,
+                  content: 'Settings cleared',
+                })
+                await reloadAppAsync()
+              }}
+            />
+            <List.Item
+              title="Clear cache"
+              description="Clear all cache"
+              left={(props) => <List.Icon {...props} icon="delete-forever" />}
+              onPress={async () => {
+                queryClient.clear()
+                setMessage({
+                  visible: true,
+                  content:
+                    'Cache cleared. Wait 1s for the persisters to actually clear',
+                })
+              }}
+            />
+          </List.Accordion>
+        </Surface>
+      )}
 
       <Snackbar
         visible={message.visible}

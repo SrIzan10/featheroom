@@ -35,18 +35,20 @@ export default function Root() {
   }, [])
 
   return (
-    <PaperProvider
-      theme={
-        Themes[
-          settings.theme === 'auto' ? (colorScheme ?? 'dark') : settings.theme
-        ][settings.color]
-      }
-    >
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <Slot />
-        </AuthProvider>
-      </QueryClientProvider>
-    </PaperProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PaperProvider
+        theme={
+          Themes[
+            settings.theme === 'auto' ? (colorScheme ?? 'dark') : settings.theme
+          ][settings.color]
+        }
+      >
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <Slot />
+          </AuthProvider>
+        </QueryClientProvider>
+      </PaperProvider>
+    </GestureHandlerRootView>
   )
 }
