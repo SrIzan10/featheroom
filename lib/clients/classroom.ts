@@ -1,7 +1,7 @@
 /* eslint-disable no-throw-literal */
 import { type classroom_v1 } from '@googleapis/classroom'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
-import { QueryClient, useQuery } from '@tanstack/react-query'
+import { QueryClient, useMutation, useQuery } from '@tanstack/react-query'
 
 import { AnnouncementUserProfile } from '../types/Classroom'
 
@@ -159,6 +159,43 @@ export function useCourseWorkMaterials(courseId: string) {
         `/v1/courses/${courseId}/courseWorkMaterials`,
         'courseWorkMaterial',
       ),
+  })
+}
+
+async function postAnnouncement(courseId: string, text: string) {
+  const token = await getAuthToken()
+  const response = await fetch(
+    `${BASE_URL}/v1/courses/${courseId}/announcements`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        text,
+        state: 'PUBLISHED',
+      }),
+    },
+  )
+
+  if (!response.ok) {
+    throw { message: response.statusText, status: response.status } as ApiError
+  }
+
+  return response.json()
+}
+
+// Mutation hook
+export function usePostAnnouncement(courseId: string) {
+  return useMutation({
+    mutationFn: (text: string) => postAnnouncement(courseId, text),
+    onSuccess: () => {
+      // Invalidate announcements query to refetch
+      queryClient.invalidateQueries({
+        queryKey: keys.courses.announcements(courseId),
+      })
+    },
   })
 }
 

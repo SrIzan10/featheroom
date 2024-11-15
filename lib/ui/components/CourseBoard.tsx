@@ -15,9 +15,9 @@ export default function CourseBoard() {
   const { id } = useLocalSearchParams() as { id: string }
   const [organizedData, setOrganizedData] = useState<JSX.Element[]>([])
 
-  const { data: announcement, isLoading: annIsLoading } = useAnnouncements(id)
-  const { data: courseWork, isLoading: cwIsLoading } = useCourseWork(id)
-  const { data: courseWorkMaterial, isLoading: cwmIsLoading } =
+  const { data: announcement, isFetching: annIsLoading } = useAnnouncements(id)
+  const { data: courseWork, isFetching: cwIsLoading } = useCourseWork(id)
+  const { data: courseWorkMaterial, isFetching: cwmIsLoading } =
     useCourseWorkMaterials(id)
 
   useEffect(() => {
@@ -74,25 +74,13 @@ export default function CourseBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [announcement, courseWork, courseWorkMaterial])
 
-  if (annIsLoading || cwIsLoading || cwmIsLoading) {
-    return <Loading />
-  }
+  // TODO: THIS DOESNT WORK RAHH SEND HELP
+  // inside a useeffect to make the loading spinner appear when adding a new announcement for example
+  useEffect(() => {
+    if (annIsLoading || cwIsLoading || cwmIsLoading) {
+      setOrganizedData([<Loading key="loading" />])
+    }
+  }, [annIsLoading, cwIsLoading, cwmIsLoading])
 
-  return (
-    <Surface className="flex-1">
-      {/* <Text>Announcements</Text>
-      {announcement?.map((a) => <Announcement key={a.id} {...a} />)}
-      <Text>Course Work</Text>
-      {courseWork &&
-        courseWork.map((cw) => (
-          <CourseWorkCard key={cw.id} isCWM={false} data={cw} />
-        ))}
-      <Text>Course Work Material</Text>
-      {courseWorkMaterial &&
-        courseWorkMaterial.map((cwm) => (
-          <CourseWorkCard key={cwm.id} isCWM data={cwm} />
-        ))} */}
-      {organizedData}
-    </Surface>
-  )
+  return <Surface className="flex-1">{organizedData}</Surface>
 }

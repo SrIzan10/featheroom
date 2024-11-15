@@ -35,6 +35,13 @@ const DrawerLayout = () => {
             title: 'Courses',
           }}
         />
+        <Drawer.Screen
+          name="courses/announcement/create/[id]"
+          options={{
+            drawerLabel: 'Create Announcement',
+            title: 'Create Announcement',
+          }}
+        />
       </Drawer>
     </GestureHandlerRootView>
   )
