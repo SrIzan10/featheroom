@@ -3,7 +3,6 @@ import { ScrollView } from 'react-native'
 import { Surface, Text, useTheme } from 'react-native-paper'
 
 import { useCourse } from '@/lib/clients/classroom'
-import AddAnnouncement from '@/lib/ui/components/AddAnnouncement'
 import CourseBoard from '@/lib/ui/components/CourseBoard'
 import Loading from '@/lib/ui/components/Loading'
 
@@ -25,7 +24,6 @@ export default function Courses() {
       }}
     >
       <Surface className="flex-1">
-        <AddAnnouncement />
         <Text>hi this is class with name {course?.name}</Text>
         <CourseBoard />
       </Surface>

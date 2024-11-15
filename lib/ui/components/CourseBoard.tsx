@@ -1,15 +1,17 @@
+import { useLocalSearchParams } from 'expo-router'
+import { useEffect, useState } from 'react'
+import { Surface } from 'react-native-paper'
+
 import {
   useAnnouncements,
   useCourseWork,
   useCourseWorkMaterials,
 } from '@/lib/clients/classroom'
-import { useLocalSearchParams } from 'expo-router'
-import Loading from './Loading'
-import { Surface, Text } from 'react-native-paper'
-import { useEffect, useState } from 'react'
+
+import AddAnnouncement from './AddAnnouncement'
 import Announcement from './Announcement'
 import CourseWorkCard from './CourseWorkCard'
-import { ScrollView } from 'react-native'
+import Loading from './Loading'
 
 export default function CourseBoard() {
   const { id } = useLocalSearchParams() as { id: string }
@@ -68,6 +70,7 @@ export default function CourseBoard() {
         }
       })
       .filter((item) => item !== undefined)
+    sorted.unshift(<AddAnnouncement key="add-announcement" />)
 
     setOrganizedData(sorted)
     // following eslint rule is not really needed for this one
