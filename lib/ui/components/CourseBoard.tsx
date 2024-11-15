@@ -77,7 +77,6 @@ export default function CourseBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [announcement, courseWork, courseWorkMaterial])
 
-  // TODO: THIS DOESNT WORK RAHH SEND HELP
   // inside a useeffect to make the loading spinner appear when adding a new announcement for example
   useEffect(() => {
     if (annIsLoading || cwIsLoading || cwmIsLoading) {
