@@ -22,6 +22,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     GoogleSignin.configure({
       scopes: [
+        'https://www.googleapis.com/auth/classroom.courses',
         'https://www.googleapis.com/auth/classroom.courses.readonly',
         'https://www.googleapis.com/auth/classroom.coursework.me',
         'https://www.googleapis.com/auth/classroom.coursework.students',
@@ -34,6 +35,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         'https://www.googleapis.com/auth/classroom.courseworkmaterials',
         'https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly',
         'https://www.googleapis.com/auth/classroom.push-notifications',
+        'https://www.googleapis.com/auth/classroom.rosters',
+        'https://www.googleapis.com/auth/userinfo.profile',
       ],
     })
 

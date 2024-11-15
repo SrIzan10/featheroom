@@ -3,6 +3,8 @@ import { type classroom_v1 } from '@googleapis/classroom'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import { QueryClient, useQuery } from '@tanstack/react-query'
 
+import { AnnouncementUserProfile } from '../types/Classroom'
+
 type ApiError = {
   message: string
   status: number
@@ -34,12 +36,31 @@ async function getAuthToken(): Promise<string> {
   return tokenPromise
 }
 
+async function fetchUserProfile(userId: string) {
+  const response = await fetch(
+    `https://classroom.googleapis.com/v1/userProfiles/${userId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${await getAuthToken()}`,
+      },
+    },
+  )
+
+  if (!response.ok) {
+    console.log('Error fetching user profile:', response.status)
+    return null
+  }
+
+  return await response.json()
+}
+
 async function fetchApi<T>(
   endpoint: string,
   insideKey?: string,
   options?: RequestInit,
 ): Promise<T> {
   const token = await getAuthToken()
+  //console.log('token', token)
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
     headers: {
@@ -50,11 +71,31 @@ async function fetchApi<T>(
   })
 
   if (!response.ok) {
+    console.log('Error:', response.statusText)
     throw { message: response.statusText, status: response.status } as ApiError
   }
 
   const data = await response.json()
-  return insideKey ? (data[insideKey] ?? []) : data
+  const key = insideKey ? (data[insideKey] ?? []) : data
+
+  // check if the key has a creatorUserId, if so, fetch the user profile
+  if (Array.isArray(key)) {
+    const enrichedKey = await Promise.all(
+      key.map(async (item) => {
+        if (item.creatorUserId) {
+          const profile = await fetchUserProfile(item.creatorUserId)
+          return {
+            ...item,
+            creator: profile,
+          }
+        }
+        return item
+      }),
+    )
+    return enrichedKey as T
+  }
+
+  return key
 }
 
 // Query Keys
@@ -92,7 +133,7 @@ export function useAnnouncements(courseId: string) {
   return useQuery({
     queryKey: keys.courses.announcements(courseId),
     queryFn: () =>
-      fetchApi<classroom_v1.Schema$Announcement[]>(
+      fetchApi<AnnouncementUserProfile[]>(
         `/v1/courses/${courseId}/announcements`,
         'announcements',
       ),
@@ -119,4 +160,22 @@ export function useCourseWorkMaterials(courseId: string) {
         'courseWorkMaterial',
       ),
   })
+}
+
+// various api utils from now on
+export function classroomDateTimeToISO(
+  date: classroom_v1.Schema$Date,
+  time?: classroom_v1.Schema$TimeOfDay,
+) {
+  if (!time) {
+    time = { hours: 23, minutes: 59 }
+  }
+  const dt = new Date(
+    date.year!,
+    date.month! - 1,
+    date.day!,
+    time.hours!,
+    time.minutes!,
+  ).toISOString()
+  return dt
 }

@@ -1,16 +1,16 @@
+import { QueryClientProvider } from '@tanstack/react-query'
 import { Slot } from 'expo-router'
-import { PaperProvider } from 'react-native-paper'
 import * as SecureStore from 'expo-secure-store'
-import { AuthProvider } from '@/lib/providers/auth'
-import { useColorScheme } from 'react-native'
 import { useEffect, useState } from 'react'
+import { useColorScheme } from 'react-native'
+import { PaperProvider } from 'react-native-paper'
+
+import { queryClient } from '@/lib/clients/classroom'
+import { AuthProvider } from '@/lib/providers/auth'
 import { Setting } from '@/lib/types'
 import { Themes } from '@/lib/ui'
 
 import '../global.css'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from '@/lib/clients/classroom'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 export default function Root() {
   const colorScheme = useColorScheme()
@@ -35,20 +35,18 @@ export default function Root() {
   }, [])
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <PaperProvider
-        theme={
-          Themes[
-            settings.theme === 'auto' ? (colorScheme ?? 'dark') : settings.theme
-          ][settings.color]
-        }
-      >
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <Slot />
-          </AuthProvider>
-        </QueryClientProvider>
-      </PaperProvider>
-    </GestureHandlerRootView>
+    <PaperProvider
+      theme={
+        Themes[
+          settings.theme === 'auto' ? (colorScheme ?? 'dark') : settings.theme
+        ][settings.color]
+      }
+    >
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <Slot />
+        </AuthProvider>
+      </QueryClientProvider>
+    </PaperProvider>
   )
 }

@@ -283,6 +283,19 @@ const Settings = () => {
             left={(props) => <List.Icon {...props} icon="code-tags" />}
           >
             <List.Item
+              title="Clear query cache"
+              description="Clear tanstack query cache"
+              left={(props) => <List.Icon {...props} icon="delete-forever" />}
+              onPress={async () => {
+                queryClient.clear()
+                setMessage({
+                  visible: true,
+                  content:
+                    'Cache cleared. Wait 1s for the persisters to actually clear',
+                })
+              }}
+            />
+            <List.Item
               title="Clear settings"
               description="Clear all setttings"
               left={(props) => <List.Icon {...props} icon="delete" />}
@@ -293,19 +306,6 @@ const Settings = () => {
                   content: 'Settings cleared',
                 })
                 await reloadAppAsync()
-              }}
-            />
-            <List.Item
-              title="Clear cache"
-              description="Clear all cache"
-              left={(props) => <List.Icon {...props} icon="delete-forever" />}
-              onPress={async () => {
-                queryClient.clear()
-                setMessage({
-                  visible: true,
-                  content:
-                    'Cache cleared. Wait 1s for the persisters to actually clear',
-                })
               }}
             />
           </List.Accordion>

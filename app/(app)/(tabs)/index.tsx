@@ -18,7 +18,7 @@ function TabsHome() {
       <Text>My Courses</Text>
       {data?.courses.map((course) => (
         <Link href={`/drawer/courses/${course.id}`} key={course.id}>
-          {course.name}
+          <Text className='text-blue-500'>{course.name}</Text>
         </Link>
       ))}
     </Surface>
