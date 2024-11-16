@@ -36,24 +36,6 @@ async function getAuthToken(): Promise<string> {
   return tokenPromise
 }
 
-async function fetchUserProfile(userId: string) {
-  const response = await fetch(
-    `https://classroom.googleapis.com/v1/userProfiles/${userId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${await getAuthToken()}`,
-      },
-    },
-  )
-
-  if (!response.ok) {
-    console.log('Error fetching user profile:', response.status)
-    return null
-  }
-
-  return await response.json()
-}
-
 async function fetchApi<T>(
   endpoint: string,
   insideKey?: string,
@@ -76,26 +58,11 @@ async function fetchApi<T>(
   }
 
   const data = await response.json()
+  // this is getting out of control quickly
   const key = insideKey ? (data[insideKey] ?? []) : data
+  const creatorProfileData = await enrichWithCreatorProfile<T>(key)
 
-  // check if the key has a creatorUserId, if so, fetch the user profile
-  if (Array.isArray(key)) {
-    const enrichedKey = await Promise.all(
-      key.map(async (item) => {
-        if (item.creatorUserId) {
-          const profile = await fetchUserProfile(item.creatorUserId)
-          return {
-            ...item,
-            creator: profile,
-          }
-        }
-        return item
-      }),
-    )
-    return enrichedKey as T
-  }
-
-  return key
+  return creatorProfileData || key
 }
 
 // Query Keys
@@ -104,12 +71,27 @@ export const keys = {
     all: ['courses'],
     one: (id: string) => ['courses', id],
     announcements: (courseId: string) => ['courses', courseId, 'announcements'],
-    courseWork: (courseId: string) => ['courses', courseId, 'courseWork'],
+    courseWorks: (courseId: string) => ['courses', courseId, 'courseWork'],
+    courseWork: (courseId: string, courseWorkId: string) => [
+      'courses',
+      courseId,
+      'courseWork',
+      courseWorkId,
+    ],
     courseWorkMaterials: (courseId: string) => [
       'courses',
       courseId,
       'courseWorkMaterials',
     ],
+    courseWorkMaterial: (courseId: string, courseWorkMaterialId: string) => [
+      'courses',
+      courseId,
+      'courseWorkMaterials',
+      courseWorkMaterialId,
+    ],
+  },
+  users: {
+    one: (id: string) => ['users', id],
   },
 }
 
@@ -142,7 +124,7 @@ export function useAnnouncements(courseId: string) {
 
 export function useCourseWork(courseId: string) {
   return useQuery({
-    queryKey: keys.courses.courseWork(courseId),
+    queryKey: keys.courses.courseWorks(courseId),
     queryFn: () =>
       fetchApi<classroom_v1.Schema$CourseWork[]>(
         `/v1/courses/${courseId}/courseWork`,
@@ -186,16 +168,24 @@ async function postAnnouncement(courseId: string, text: string) {
   return response.json()
 }
 
-// Mutation hook
 export function usePostAnnouncement(courseId: string) {
   return useMutation({
     mutationFn: (text: string) => postAnnouncement(courseId, text),
     onSuccess: () => {
-      // Invalidate announcements query to refetch
       queryClient.invalidateQueries({
         queryKey: keys.courses.announcements(courseId),
       })
     },
+  })
+}
+
+export function useGetCourseWork(courseId: string, courseWorkId: string) {
+  return useQuery({
+    queryKey: keys.courses.courseWork(courseId, courseWorkId),
+    queryFn: () =>
+      fetchApi<classroom_v1.Schema$CourseWork>(
+        `/v1/courses/${courseId}/courseWork/${courseWorkId}`,
+      ),
   })
 }
 
@@ -215,4 +205,47 @@ export function classroomDateTimeToISO(
     time.minutes!,
   ).toISOString()
   return dt
+}
+
+// TODO: refactor to cache user profiles inside the queryClient (users.one)
+async function fetchUserProfile(userId: string) {
+  const response = await fetch(
+    `https://classroom.googleapis.com/v1/userProfiles/${userId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${await getAuthToken()}`,
+      },
+    },
+  )
+
+  if (!response.ok) {
+    console.log('Error fetching user profile:', response.status)
+    return null
+  }
+
+  return await response.json()
+}
+async function enrichWithCreatorProfile<T>(data: any): Promise<T> {
+  if (Array.isArray(data)) {
+    const enrichedData = await Promise.all(
+      data.map(async (item) => {
+        if (item.creatorUserId) {
+          const profile = await fetchUserProfile(item.creatorUserId)
+          return {
+            ...item,
+            creator: profile,
+          }
+        }
+        return item
+      }),
+    )
+    return enrichedData as T
+  } else if (data.creatorUserId) {
+    const profile = await fetchUserProfile(data.creatorUserId)
+    return {
+      ...data,
+      creator: profile,
+    } as T
+  }
+  return data as T
 }
