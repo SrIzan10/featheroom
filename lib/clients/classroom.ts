@@ -144,30 +144,6 @@ export function useCourseWorkMaterials(courseId: string) {
   })
 }
 
-async function postAnnouncement(courseId: string, text: string) {
-  const token = await getAuthToken()
-  const response = await fetch(
-    `${BASE_URL}/v1/courses/${courseId}/announcements`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        text,
-        state: 'PUBLISHED',
-      }),
-    },
-  )
-
-  if (!response.ok) {
-    throw { message: response.statusText, status: response.status } as ApiError
-  }
-
-  return response.json()
-}
-
 export function usePostAnnouncement(courseId: string) {
   return useMutation({
     mutationFn: (text: string) => postAnnouncement(courseId, text),
@@ -185,6 +161,19 @@ export function useGetCourseWork(courseId: string, courseWorkId: string) {
     queryFn: () =>
       fetchApi<classroom_v1.Schema$CourseWork>(
         `/v1/courses/${courseId}/courseWork/${courseWorkId}`,
+      ),
+  })
+}
+
+export function useGetCourseWorkMaterial(
+  courseId: string,
+  courseWorkMaterialId: string,
+) {
+  return useQuery({
+    queryKey: keys.courses.courseWorkMaterial(courseId, courseWorkMaterialId),
+    queryFn: () =>
+      fetchApi<classroom_v1.Schema$CourseWorkMaterial>(
+        `/v1/courses/${courseId}/courseWorkMaterials/${courseWorkMaterialId}`,
       ),
   })
 }
@@ -248,4 +237,28 @@ async function enrichWithCreatorProfile<T>(data: any): Promise<T> {
     } as T
   }
   return data as T
+}
+
+async function postAnnouncement(courseId: string, text: string) {
+  const token = await getAuthToken()
+  const response = await fetch(
+    `${BASE_URL}/v1/courses/${courseId}/announcements`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        text,
+        state: 'PUBLISHED',
+      }),
+    },
+  )
+
+  if (!response.ok) {
+    throw { message: response.statusText, status: response.status } as ApiError
+  }
+
+  return response.json()
 }
