@@ -26,7 +26,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         'https://www.googleapis.com/auth/classroom.courses.readonly',
         'https://www.googleapis.com/auth/classroom.coursework.me',
         'https://www.googleapis.com/auth/classroom.coursework.students',
-        'https://www.googleapis.com/auth/classroom.coursework.students.readonly',
         'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
         'https://www.googleapis.com/auth/classroom.profile.emails',
         'https://www.googleapis.com/auth/classroom.profile.photos',
@@ -37,6 +36,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         'https://www.googleapis.com/auth/classroom.push-notifications',
         'https://www.googleapis.com/auth/classroom.rosters',
         'https://www.googleapis.com/auth/userinfo.profile',
+        'https://www.googleapis.com/auth/drive.file',
+        'https://www.googleapis.com/auth/drive.readonly',
       ],
     })
 

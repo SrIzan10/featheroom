@@ -2,6 +2,8 @@
 import { type classroom_v1 } from '@googleapis/classroom'
 import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import { QueryClient, useMutation, useQuery } from '@tanstack/react-query'
+import { Buffer } from 'buffer'
+import * as FileSystem from 'expo-file-system'
 
 import { AnnouncementUserProfile } from '../types/Classroom'
 
@@ -39,6 +41,7 @@ async function getAuthToken(): Promise<string> {
 async function fetchApi<T>(
   endpoint: string,
   insideKey?: string,
+  arrayZero?: boolean,
   options?: RequestInit,
 ): Promise<T> {
   const token = await getAuthToken()
@@ -59,7 +62,11 @@ async function fetchApi<T>(
 
   const data = await response.json()
   // this is getting out of control quickly
-  const key = insideKey ? (data[insideKey] ?? []) : data
+  const key = insideKey
+    ? arrayZero
+      ? (data[insideKey]?.[0] ?? null)
+      : (data[insideKey] ?? [])
+    : data
   const creatorProfileData = await enrichWithCreatorProfile<T>(key)
 
   return creatorProfileData || key
@@ -77,6 +84,13 @@ export const keys = {
       courseId,
       'courseWork',
       courseWorkId,
+    ],
+    courseWorkSubmissionState: (courseId: string, courseWorkId: string) => [
+      'courses',
+      courseId,
+      'courseWork',
+      courseWorkId,
+      'submissionState',
     ],
     courseWorkMaterials: (courseId: string) => [
       'courses',
@@ -144,30 +158,6 @@ export function useCourseWorkMaterials(courseId: string) {
   })
 }
 
-async function postAnnouncement(courseId: string, text: string) {
-  const token = await getAuthToken()
-  const response = await fetch(
-    `${BASE_URL}/v1/courses/${courseId}/announcements`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        text,
-        state: 'PUBLISHED',
-      }),
-    },
-  )
-
-  if (!response.ok) {
-    throw { message: response.statusText, status: response.status } as ApiError
-  }
-
-  return response.json()
-}
-
 export function usePostAnnouncement(courseId: string) {
   return useMutation({
     mutationFn: (text: string) => postAnnouncement(courseId, text),
@@ -186,6 +176,36 @@ export function useGetCourseWork(courseId: string, courseWorkId: string) {
       fetchApi<classroom_v1.Schema$CourseWork>(
         `/v1/courses/${courseId}/courseWork/${courseWorkId}`,
       ),
+  })
+}
+
+export function useGetCourseWorkSubmissionState(
+  courseId: string,
+  courseWorkId: string,
+) {
+  return useQuery({
+    queryKey: keys.courses.courseWorkSubmissionState(courseId, courseWorkId),
+    queryFn: () =>
+      fetchApi<classroom_v1.Schema$CourseWork>(
+        `/v1/courses/${courseId}/courseWork/${courseWorkId}/studentSubmissions`,
+        'studentSubmissions',
+        true,
+      ),
+  })
+}
+
+export function useSubmitCourseWork(courseId: string, courseWorkId: string) {
+  return useMutation({
+    mutationFn: (files: FileData[]) =>
+      uploadSubmission(courseId, courseWorkId, files),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: keys.courses.courseWorkSubmissionState(
+          courseId,
+          courseWorkId,
+        ),
+      })
+    },
   })
 }
 
@@ -248,4 +268,166 @@ async function enrichWithCreatorProfile<T>(data: any): Promise<T> {
     } as T
   }
   return data as T
+}
+
+interface FileData {
+  uri: string
+  name: string
+  type: string
+}
+
+async function uploadSubmission(
+  courseId: string,
+  courseWorkId: string,
+  files: FileData[],
+) {
+  files.forEach((file) => {
+    if (!file || !file.name || !file.type || !file.uri) {
+      throw new Error(`Invalid file object: ${JSON.stringify(file)}`)
+    }
+  })
+
+  console.log(`Starting upload for ${files.length} files`)
+  const token = await getAuthToken()
+
+  const uploadPromises = files.map(async (file, index) => {
+    try {
+      console.log(`Uploading file ${index + 1}/${files.length}: ${file.name}`)
+
+      // Read file content as binary
+      const fileContent = await FileSystem.readAsStringAsync(file.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      })
+      const fileBuffer = Buffer.from(fileContent, 'base64')
+
+      // Define the boundary
+      const boundary = 'foo_bar_baz'
+
+      // Construct the multipart request body
+      const multipartBody = `
+--${boundary}
+Content-Type: application/json; charset=UTF-8
+
+${JSON.stringify({
+  name: file.name,
+  mimeType: file.type,
+})}
+--${boundary}
+Content-Type: ${file.type}
+
+`
+
+      // Convert multipart body to Uint8Array
+      const preBody = Buffer.from(multipartBody, 'utf8')
+      const postBody = Buffer.from(`\n--${boundary}--\n`, 'utf8')
+
+      // Combine all parts
+      const body = Buffer.concat([preBody, fileBuffer, postBody])
+
+      const driveResponse = await fetch(
+        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': `multipart/related; boundary=${boundary}`,
+          },
+          body,
+        },
+      )
+
+      if (!driveResponse.ok) {
+        const error = await driveResponse.text()
+        throw new Error(
+          `Upload failed with status ${driveResponse.status}: ${error}`,
+        )
+      }
+
+      const responseData = await driveResponse.json()
+      console.log(
+        `File ${index + 1} uploaded successfully, Drive ID: ${responseData.id}`,
+      )
+      return responseData
+    } catch (error) {
+      console.error(`Error uploading file ${file.name}:`, error)
+      throw error
+    }
+  })
+
+  console.log('Waiting for all uploads to complete...')
+  const driveFiles = await Promise.all(uploadPromises)
+  console.log(`All ${driveFiles.length} files uploaded successfully`)
+  return await submitToClassroom(courseId, courseWorkId, driveFiles)
+}
+
+async function submitToClassroom(
+  courseId: string,
+  courseWorkId: string,
+  driveFiles: { id: string }[],
+) {
+  console.log('Submitting to Classroom...')
+  console.log(`Course ID: ${courseId}, CourseWork ID: ${courseWorkId}`)
+  console.log(`Attempting to submit ${driveFiles.length} files`)
+
+  console.log('Getting auth token...')
+  const token = await getAuthToken()
+  console.log('Auth token obtained')
+
+  // Get submissions using vanilla fetch
+  console.log('Fetching student submissions...')
+  const submissionsResponse = await fetch(
+    `${BASE_URL}/v1/courses/${courseId}/courseWork/${courseWorkId}/studentSubmissions`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    },
+  )
+
+  if (!submissionsResponse.ok) {
+    console.error(`Submission response status: ${submissionsResponse.status}`)
+    throw new Error(
+      `Failed to get submissions: ${submissionsResponse.statusText}`,
+    )
+  }
+
+  const submissions = await submissionsResponse.json()
+  console.log(
+    'Submissions data received:',
+    JSON.stringify(submissions, null, 2),
+  )
+  const submissionId = submissions.studentSubmissions[0].id
+  console.log(`Using submission ID: ${submissionId}`)
+
+  // Submit attachments
+  console.log('Sending attachment modification request...')
+  const attachResponse = await fetch(
+    `${BASE_URL}/v1/courses/${courseId}/courseWork/${courseWorkId}/studentSubmissions/${submissionId}:modifyAttachments`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        addAttachments: driveFiles.map((file) => ({
+          driveFile: { id: file.id },
+        })),
+      }),
+    },
+  )
+
+  if (!attachResponse.ok) {
+    console.error(`Attach response status: ${attachResponse.status}`)
+    const json = await attachResponse.json()
+    console.error(`Failed to attach files: ${JSON.stringify(json, null, 2)}`)
+    return
+  }
+
+  console.log('Attachment modification completed')
+  const response = await attachResponse.json()
+  console.log('Final response:', JSON.stringify(response, null, 2))
+  return response
 }
