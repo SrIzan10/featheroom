@@ -1,13 +1,15 @@
-import { List, Surface, Text } from 'react-native-paper'
+import { useRouter } from 'expo-router'
+import React from 'react'
+import { Pressable } from 'react-native'
+import { Surface } from 'react-native-paper'
 
 import { useCourses } from '@/lib/clients/classroom'
-import { View } from 'react-native'
-import React from 'react'
-import { Link } from 'expo-router'
+import CourseCard from '@/lib/ui/components/CourseCard'
 import Loading from '@/lib/ui/components/Loading'
 
 function TabsHome() {
   const { data, isLoading } = useCourses()
+  const router = useRouter()
 
   if (isLoading) {
     return <Loading />
@@ -15,11 +17,15 @@ function TabsHome() {
 
   return (
     <Surface className="flex-1">
-      <Text>My Courses</Text>
       {data?.courses.map((course) => (
-        <Link href={`/drawer/courses/${course.id}`} key={course.id}>
-          <Text className='text-blue-500'>{course.name}</Text>
-        </Link>
+        <Pressable
+          key={course.id}
+          onPress={() => {
+            router.push(`/drawer/courses/${course.id}`)
+          }}
+        >
+          <CourseCard key={course.id} {...course} />
+        </Pressable>
       ))}
     </Surface>
   )
